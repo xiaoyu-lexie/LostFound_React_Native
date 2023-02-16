@@ -14,15 +14,16 @@ export default FlatButtion;
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#c2dbf1",
+    backgroundColor: "#c5dcf1",
     height: 45,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 6,
+    marginVertical: 17,
   },
   text: {
-    color: "#554dc8",
-    fontSize: 15,
+    color: "#014098",
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

@@ -9,7 +9,7 @@ const ListItem = ({ foundOrLost, item, borderColor }) => {
     foundOrLost === "found" ? "FoundDetailPage" : "LostDetailPage";
   const itemPressHandler = () => {
     navigation.navigate(navegateTo, {
-      itemId: item.id,
+      data: item,
     });
   };
 

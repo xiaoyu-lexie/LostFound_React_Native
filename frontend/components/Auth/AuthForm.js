@@ -5,14 +5,15 @@ import {
   Keyboard,
   ScrollView,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { useState } from "react";
 
 import Input from "../Input";
+import FlatButtion from "./FlatButton";
 
-import USERS from "../../DUMMY_DATA/USERS";
-
-const AuthForm = ({ isLogin }) => {
+const AuthForm = ({ isLogin, submitAuthHandler }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState({
     value: "",
     isValid: true,
@@ -44,6 +45,10 @@ const AuthForm = ({ isLogin }) => {
           isValid: true,
           isEmpty: false,
         }));
+        setConfirmEmail((prev) => ({
+          ...prev,
+          isValid: true,
+        }));
         break;
       case "confirmEmail":
         setConfirmEmail((prev) => ({
@@ -51,6 +56,10 @@ const AuthForm = ({ isLogin }) => {
           value: enteredValue,
           isValid: true,
           isEmpty: false,
+        }));
+        setEmail((prev) => ({
+          ...prev,
+          isValid: true,
         }));
         break;
       case "password":
@@ -83,6 +92,21 @@ const AuthForm = ({ isLogin }) => {
         if (!regex.test(email.value)) {
           setEmail((prev) => ({ ...prev, isValid: false, isEmpty: false }));
         }
+        if (
+          email.value !== confirmEmail.value &&
+          confirmEmail.value.length > 0
+        ) {
+          setEmail((prev) => ({
+            ...prev,
+            isValid: false,
+            isEmpty: false,
+          }));
+          setConfirmEmail((prev) => ({
+            ...prev,
+            isValid: false,
+            isEmpty: false,
+          }));
+        }
         break;
       case "confirmEmail":
         if (confirmEmail.value.length === 0) {
@@ -91,6 +115,7 @@ const AuthForm = ({ isLogin }) => {
             isValid: false,
             isEmpty: true,
           }));
+
           break;
         }
         if (email.value !== confirmEmail.value) {
@@ -99,6 +124,10 @@ const AuthForm = ({ isLogin }) => {
             isValid: false,
             isEmpty: false,
           }));
+          // setEmail((prev) => ({
+          //   ...prev,
+          //   isValid: false,
+          // }));
         }
         break;
       case "password":
@@ -134,33 +163,74 @@ const AuthForm = ({ isLogin }) => {
     }
   };
 
-  const submitAuthHandler = () => {
+  const submitHandler = () => {
     Keyboard.dismiss();
-    console.log(
-      email.isValid,
-      email.isEmpty,
-      password.isValid,
-      password.isEmpty,
-      confirmEmail.isValid,
-      confirmPassword.isValid
-    );
+    // console.log(
+    //   email.isValid,
+    //   email.isEmpty,
+    //   password.isValid,
+    //   password.isEmpty,
+    //   confirmEmail.isValid,
+    //   confirmEmail.isEmpty,
+    //   confirmPassword.isValid,
+    //   confirmPassword.isEmpty
+    // );
 
     // empty check (complementation to onBlur validality check), this is to check the senario that when the user didn't touch any input and click the login buttion directly, and this senario cannot be captured by onBlur validality check
-    if (email.value.length === 0) {
-      setEmail((prev) => ({ ...prev, isEmpty: true }));
+    if (isLogin && (email.value.length === 0 || password.value.length === 0)) {
+      Alert.alert("login Input cannot be empty, please check.");
+
+      if (email.value.length === 0) {
+        setEmail((prev) => ({ ...prev, isEmpty: true }));
+      }
+
+      if (password.value.length === 0) {
+        setPassword((prev) => ({ ...prev, isEmpty: true }));
+      }
+
+      return;
+    } else if (
+      !isLogin &&
+      (email.value.length === 0 ||
+        confirmEmail.value.length === 0 ||
+        password.value.length === 0 ||
+        confirmPassword.value.length === 0)
+    ) {
+      Alert.alert("Input cannot be empty, please check.");
+
+      if (email.value.length === 0) {
+        setEmail((prev) => ({ ...prev, isEmpty: true }));
+      }
+
+      if (confirmEmail.value.length === 0) {
+        setConfirmEmail((prev) => ({
+          ...prev,
+          isEmpty: true,
+        }));
+      }
+
+      if (password.value.length === 0) {
+        setPassword((prev) => ({ ...prev, isEmpty: true }));
+      }
+
+      if (confirmPassword.value.length === 0) {
+        setConfirmPassword((prev) => ({ ...prev, isEmpty: true }));
+      }
+
+      return;
     }
 
-    if (confirmEmail.value.length === 0) {
-      setConfirmEmail((prev) => ({ ...prev, isEmpty: true }));
-    }
-
-    if (password.value.length === 0) {
-      setPassword((prev) => ({ ...prev, isEmpty: true }));
-    }
-
-    if (confirmPassword.value.length === 0) {
-      setConfirmPassword((prev) => ({ ...prev, isEmpty: true }));
-    }
+    //不能用isEmpty来做if条件，因为来不及
+    // if (
+    //   email.isEmpty ||
+    //   confirmEmail.isEmpty ||
+    //   password.isEmpty ||
+    //   confirmPassword.isEmpty
+    // ) {
+    //   console.log("empty wrong");
+    //   Alert.alert("Please check your input");
+    //   return;
+    // }
 
     // onBlur validality check
     if (
@@ -170,8 +240,11 @@ const AuthForm = ({ isLogin }) => {
       !confirmPassword.isValid
     ) {
       console.log("somwthing wrong");
+      Alert.alert("Please check your input");
       return;
     }
+
+    submitAuthHandler(email.value, password.value);
   };
 
   return (
@@ -179,7 +252,7 @@ const AuthForm = ({ isLogin }) => {
       <Input
         label="Email"
         style={{
-          marginVertical: 10,
+          marginVertical: 3,
         }}
         onChangeHandler={(enteredValue) =>
           onChangeHandler("email", enteredValue)
@@ -187,7 +260,7 @@ const AuthForm = ({ isLogin }) => {
         blurValidationHandler={() => onBlurHandler("email")}
         value={email.value}
         isValid={email.isValid}
-        notValidText={"Not valid confidentials"}
+        notValidText={"Not valid email"}
         isEmpty={email.isEmpty}
         textInputConfig={{
           keyboardType: "email-address",
@@ -197,7 +270,7 @@ const AuthForm = ({ isLogin }) => {
       {!isLogin && (
         <Input
           label="Confirm Email"
-          style={{ marginVertical: 10 }}
+          style={{ marginVertical: 3 }}
           onChangeHandler={(enteredValue) =>
             onChangeHandler("confirmEmail", enteredValue)
           }
@@ -214,14 +287,14 @@ const AuthForm = ({ isLogin }) => {
       )}
       <Input
         label="Password"
-        style={{ marginVertical: 10 }}
+        style={{ marginVertical: 3 }}
         onChangeHandler={(enteredValue) =>
           onChangeHandler("password", enteredValue)
         }
         value={password.value}
         blurValidationHandler={() => onBlurHandler("password")}
         isValid={password.isValid}
-        notValidText={"Not valid confidentials"}
+        notValidText={"The length of password should be greater than 5"}
         isEmpty={password.isEmpty}
         textInputConfig={{
           autoCapitalize: "none",
@@ -230,13 +303,13 @@ const AuthForm = ({ isLogin }) => {
       {!isLogin && (
         <Input
           label="Confirm Password"
-          style={{ marginVertical: 10 }}
+          style={{ marginVertical: 3 }}
           onChangeHandler={(enteredValue) =>
             onChangeHandler("confirmPassword", enteredValue)
           }
           value={confirmPassword.value}
           blurValidationHandler={() => onBlurHandler("confirmPassword")}
-          isValid={confirmEmail.isValid}
+          isValid={confirmPassword.isValid}
           notValidText={"Not same password"}
           isEmpty={confirmPassword.isEmpty}
           textInputConfig={{
@@ -244,9 +317,9 @@ const AuthForm = ({ isLogin }) => {
           }}
         />
       )}
-      <Button
-        title={isLogin ? "Log In" : "Sign Up"}
-        onPress={submitAuthHandler}
+      <FlatButtion
+        buttonText={isLogin ? "Log In" : "Sign Up"}
+        onPressHandler={submitHandler}
       />
     </View>
   );

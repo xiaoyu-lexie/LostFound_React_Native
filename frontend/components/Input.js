@@ -13,7 +13,7 @@ const Input = ({
 }) => {
   return (
     <View style={style}>
-      <Text>{label}</Text>
+      <Text style={styles.labelText}>{label}</Text>
       <TextInput
         style={styles.input}
         {...textInputConfig}
@@ -22,11 +22,10 @@ const Input = ({
         onBlur={blurValidationHandler}
         isEmpty={isEmpty}
       />
-
       {isEmpty ? (
-        <Text>Cannot be empty</Text>
+        <Text style={styles.warnText}>Cannot be empty</Text>
       ) : isValid ? null : (
-        <Text>{notValidText}</Text>
+        <Text style={styles.warnText}>{notValidText}</Text>
       )}
     </View>
   );
@@ -35,10 +34,23 @@ const Input = ({
 export default Input;
 
 const styles = StyleSheet.create({
+  labelText: {
+    color: "#014098",
+    fontSize: 16,
+    marginVertical: 5,
+  },
   input: {
-    borderColor: "#554dc8",
+    borderColor: "#7ab1e4",
     borderWidth: 2,
     borderRadius: 6,
     height: 45,
+    fontSize: 20,
+    padding: 5,
+    color: "#0a4ba7",
+  },
+  warnText: {
+    color: "#ae5a06",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
